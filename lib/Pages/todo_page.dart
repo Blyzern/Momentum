@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // For clipboard functionality
 
 import 'package:momentum/methods/initialize_app_folder.dart';
+import 'package:momentum/Components/copied_popup.dart';
 
 class TodoPage extends StatefulWidget {
   @override
@@ -11,7 +12,6 @@ class TodoPage extends StatefulWidget {
 class _TodoPageState extends State<TodoPage> {
   List<Map<String, dynamic>> tasks = [];
   TextEditingController _controller = TextEditingController();
-  int? _isCopiedIndex;
   @override
   void initState() {
     super.initState();
@@ -21,7 +21,8 @@ class _TodoPageState extends State<TodoPage> {
 
   Future _setToDo() async {
     tasks = await readToDo();
-    setState(() {});
+    setState(
+        () {}); // This makes sure that the page refreshes and shows the tasks
   }
 
   // Method to add a task to the list
@@ -62,37 +63,18 @@ class _TodoPageState extends State<TodoPage> {
 
   void _copyToClipboard(String taskText) {
     Clipboard.setData(ClipboardData(text: taskText)).then((_) {
-      double screenWidth = MediaQuery.of(context).size.width;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.cloud_done, color: Colors.white, size: 20),
-              SizedBox(width: 5),
-              Text('Copied to clipboard!',
-                  style:
-                      TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                  textAlign: TextAlign.center),
-            ],
-          ),
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          duration: Duration(seconds: 3),
-          behavior: SnackBarBehavior
-              .floating, // Makes it float instead of being attached to the bottom
-          margin: EdgeInsets.only(
-              bottom: 80,
-              left: screenWidth / 3,
-              right: screenWidth / 3), // Adjust position
-        ),
-      );
+      showCompactSnackbar(context, "Copied to clipboard!");
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('To-Do List')),
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        title: Text('To-Do List'),
+        backgroundColor: Colors.transparent,
+      ),
       body: SafeArea(
         child: Stack(
           children: [
@@ -100,7 +82,10 @@ class _TodoPageState extends State<TodoPage> {
               itemCount: tasks.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text(tasks[index]['task']),
+                  title: TaskToDo(
+                    tasks: tasks,
+                    i: index,
+                  ),
                   leading: Checkbox(
                     value: tasks[index]['completed'],
                     activeColor: Theme.of(context).colorScheme.inversePrimary,
@@ -113,7 +98,7 @@ class _TodoPageState extends State<TodoPage> {
                     children: [
                       // Edit Button
                       IconButton(
-                        icon: Icon(Icons.edit),
+                        icon: EditIcon(),
                         onPressed: () {
                           _controller.text = tasks[index]['task'];
                           showDialog(
@@ -168,7 +153,7 @@ class _TodoPageState extends State<TodoPage> {
                       // Copy Button
 
                       IconButton(
-                        icon: Icon(Icons.copy),
+                        icon: CopyIcon(),
                         onPressed: () {
                           _copyToClipboard(tasks[index]['task']);
                         }, // Remove onPressed since GestureDetector handles it
@@ -209,5 +194,43 @@ class _TodoPageState extends State<TodoPage> {
         child: Icon(Icons.add),
       ),
     );
+  }
+}
+
+class CopyIcon extends StatelessWidget {
+  const CopyIcon({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Icon(Icons.copy);
+  }
+}
+
+class EditIcon extends StatelessWidget {
+  const EditIcon({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Icon(Icons.edit);
+  }
+}
+
+class TaskToDo extends StatelessWidget {
+  const TaskToDo({
+    super.key,
+    required this.tasks,
+    required this.i,
+  });
+
+  final List<Map<String, dynamic>> tasks;
+  final int i;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(tasks[i]['task']);
   }
 }

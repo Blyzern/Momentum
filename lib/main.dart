@@ -1,20 +1,10 @@
 import 'package:flutter/material.dart';
 import "package:momentum/Pages/todo_page.dart";
+import 'package:momentum/Components/gradient_box.dart';
 
 void main() {
   runApp(const Momentum());
 }
-
-// To move in it's own file
-BoxDecoration gradientBox(Color first, Color second) {
-  return BoxDecoration(
-      gradient: LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: <Color>[first, second],
-  ));
-}
-// ###########################
 
 class Momentum extends StatelessWidget {
   const Momentum({super.key});
